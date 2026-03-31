@@ -7,7 +7,7 @@ app.get('/', (req, res) => {
 
 // Vulnerability: command injection risk
 app.get('/ping', (req, res) => {
-  const { exec } = require('child_process);
+  const { exec } = require('child_process');
   const host = req.query.host;
 
   exec(`ping -c 1 ${host}`, (err, stdout) => {
