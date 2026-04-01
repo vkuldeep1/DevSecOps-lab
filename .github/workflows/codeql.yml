@@ -30,3 +30,15 @@ jobs:
 
       - name: Run CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+          with:
+            category: "/language:javascript"
+
+      # FAIL PIPELINE IF CRITICAL/HIGH ISSUES EXIST
+      - name: Fail on vulnerabilities
+        run: |
+          echo "Checking for vulnerabilities---"
+          count=$(jq '.runs[].results | length' results.sarif)
+          if [ "$count" -gt 0 ]; then
+            echo "Vulnerabilities found: $count"
+            exit 1
+          fi
