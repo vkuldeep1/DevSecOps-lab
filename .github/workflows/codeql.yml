@@ -1,4 +1,4 @@
-name: "CodeQL"
+name: "DevSecOps CodeQL Pipeline"
 
 on:
   push:
@@ -9,33 +9,35 @@ on:
 
 jobs:
   analyze:
-    name: Analyze
+    name: CodeQL Analysis + Security Gate
     runs-on: ubuntu-latest
 
     permissions:
       actions: read
       contents: read
-      security-events: read
+      security-events: read   # REQUIRED for API access
 
     steps:
-      - name: Checkout repo
+      # Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Initialize CodeQL
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@v3
         with:
           languages: javascript
 
+      # Autobuild
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v4
+        uses: github/codeql-action/autobuild@v3
 
+      # Run Analysis
       - name: Run CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: "/language:javascript"
+        uses: github/codeql-action/analyze@v3
 
-      # FAIL PIPELINE IF CRITICAL/HIGH ISSUES EXIST
-      - name: Fail on CodeQL alters
+      # Security Gate (REAL ENFORCEMENT)
+      - name: Fail on CodeQL alerts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -44,16 +46,16 @@ jobs:
           response=$(curl -s \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repositary }}/code-scanning/alerts?state=open)
+            "https://api.github.com/repos/${{ github.repository }}/code-scanning/alerts?state=open")
 
           echo "Raw response:"
-          echo "$resources"
+          echo "$response"
 
-          count=$(echo "$response" | jq '[.[] | select(.rule.severity == "error" or .rule.serverity == "warning")] | length')
+          count=$(echo "$response" | jq '[.[]? | select(.rule.severity == "error" or .rule.severity == "warning")] | length')
 
-          echo "Open vulnerabilities: $count"
+          echo "Open vulnerabilities (High/Critical): $count"
 
           if [ "$count" -gt 0 ]; then
-            echo "Failing due to vulnerabilities"
+            echo "Failing due to security policy violation"
             exit 1
           fi
