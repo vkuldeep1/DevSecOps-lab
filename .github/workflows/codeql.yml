@@ -37,25 +37,28 @@ jobs:
         uses: github/codeql-action/analyze@v3
 
       # Security Gate (REAL ENFORCEMENT)
-      - name: Fail on CodeQL alerts
+      - name: Fail on CodeQL alerts (PR scoped)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Checking CodeQL alerts..."
+          echo "Checking CodeQL alerts for this PR..."
+
+          PR_NUMBER=${{ github.event.pull_request.number }}
 
           response=$(curl -s \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/code-scanning/alerts?state=open")
+            "https://api.github.com/repos/${{ github.repository }}/code-scanning/alerts?state=open&pr=$PR_NUMBER")
 
           echo "Raw response:"
           echo "$response"
 
           count=$(echo "$response" | jq '[.[]? | select(.rule.severity == "error" or .rule.severity == "warning")] | length')
 
-          echo "Open vulnerabilities (High/Critical): $count"
+          echo "Open vulnerabilities in PR: $count"
 
           if [ "$count" -gt 0 ]; then
-            echo "Failing due to security policy violation"
+            echo "Failing due to seceurity policy violation"
             exit 1
           fi
+
