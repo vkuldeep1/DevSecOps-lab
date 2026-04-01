@@ -1,6 +1,14 @@
 const express = require("express");
 const app = express();
 const { spawn } = require('child_process');
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10
+});
+
+app.use(limiter);
 
 app.get('/', (req, res) => {
   res.send("Hello DevSecOps");
