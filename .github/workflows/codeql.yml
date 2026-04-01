@@ -46,7 +46,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repositary }}/code-scanning/alerts?state=open)
 
-          count=$(echo "$alerts" | jq '[.[] | select(.rule.severity == "error" or .rule.serverity == "warning")] | length")
+          count=$(echo "$alerts" | jq '[.[] | select(.rule.severity == "error" or .rule.serverity == "warning")] | length')
 
           echo "Open vulnerabilities: $count"
 
