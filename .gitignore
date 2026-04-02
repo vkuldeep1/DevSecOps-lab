@@ -1,26 +1,25 @@
-# Node dependencies
+# Node
 node_modules/
+package-lock.json   # optional (depends on team policy)
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Environment variables (critical)
+# Env
 .env
 .env.*
 
-# OS junk
+# Logs
+*.log
+
+# OS
 .DS_Store
 Thumbs.db
 
-# Docker
-*.log
-
-# Build artifacts
-dist/
-build/
-
-# Optional: editor files
+# Editor
 .vscode/
 .idea/
+
+# Docker
+.dockerignore
+
+# Build
+dist/
+build/
