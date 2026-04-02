@@ -1,9 +1,9 @@
 const express = require("express");
 const app = express();
-const { spawn } = require('child_process');
-const rateLimit = require('express-rate-limit');
+const { spawn } = require("child_process");
+const rateLimit = require("express-rate-limit");
 
-// Apply rate limiting
+// Rate limiting
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10
@@ -11,12 +11,12 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Root route
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.send("Hello DevSecOps");
 });
 
 // Secure ping route
-app.get('/ping', (req, res) => {
+app.get("/ping", (req, res) => {
   const host = req.query.host;
 
   // Strict validation
@@ -24,19 +24,30 @@ app.get('/ping', (req, res) => {
     return res.status(400).send("Invalid host");
   }
 
-  const ping = spawn('ping', ['-c', '1', host]);
+  // Block internal/private networks
+  if (
+    host === "localhost" ||
+    host.startsWith("127.") ||
+    host.startsWith("10.") ||
+    host.startsWith("192.168") ||
+    host.startsWith("172.")
+  ) {
+    return res.status(403).send("Forbidden host");
+  }
 
-  let output = '';
+  const ping = spawn("ping", ["-c", "1", host]);
 
-  ping.stdout.on('data', (data) => {
+  let output = "";
+
+  ping.stdout.on("data", (data) => {
     output += data.toString();
   });
 
-  ping.stderr.on('data', (data) => {
+  ping.stderr.on("data", (data) => {
     output += data.toString();
   });
 
-  ping.on('close', () => {
+  ping.on("close", () => {
     res.send(output);
   });
 });
