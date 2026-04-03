@@ -86,5 +86,5 @@ jobs:
 
           docker run --rm \
             -v $(pwd)/app-copy:/scam \
-            ghcr.io/aquasec/trivy:latest \
+            ghcr.io/aquasecurity/trivy:latest \
             fs --scanners vuln --serverity HIGH,CRITICAL /scan
