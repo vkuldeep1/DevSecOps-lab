@@ -1,5 +1,8 @@
 FROM node:20-alpine3.21
 
+# Update the os
+RUN apk update && apk upgrade
+
 # Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
