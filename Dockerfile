@@ -1,15 +1,20 @@
-FROM node:20-alpine3.20
+FROM node:20-alpine3.21
 
-RUN apk upgrade && apk update
+# Update the os
+RUN apk update && apk upgrade
 
+# Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
+# Copy only package files first (better caching)
 COPY app/package*.json ./
 
-RUN npm install --only=production
+# Install dependencies securely
+RUN npm ci --omit=dev
 
+# Copy app source
 COPY app/ .
 
 USER appuser
