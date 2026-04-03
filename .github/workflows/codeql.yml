@@ -77,3 +77,8 @@ jobs:
           severity: CRITICAL,HIGH
           vuln-type: os
           scanners: vuln
+
+      - name: Scan Node Dependencies 
+        run: |
+          docker run --rm devsecops-app sh -c "trivy fs --format table /app"
+
