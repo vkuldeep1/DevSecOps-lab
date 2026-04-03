@@ -64,6 +64,10 @@ jobs:
       - name: Build Docker Image
         run: docker build -t devsecops-app .
 
+      - name: Debug dependencies inside image
+        run: |
+          docker run devsecops-app npm list glob minimatch tar cross-spawn
+
       - name: Scan Docker Image with Trivy
         uses: aquasecurity/trivy-action@v0.20.0
         with:
