@@ -78,13 +78,24 @@ jobs:
           vuln-type: os
           scanners: vuln
 
-      - name: Scan Node Dependencies via filesystem
+      - name: Scan filesystem with Trivy (FIXED)
         run: |
           docker create --name temp-container devsecops-app
-          docker cp temp-container:/app ./app-cpy
-          docker rm temp-container
 
+          # verify path exists (important)
+          docker start temp-container
+          docker exec temp-container ls /app
+
+          # copy files
+          docker cp temp-container:/app ./app-copy
+
+          docker rm -f temp-container
+
+          # verify copy worked
+          ls -la app-copy
+
+          # run scan
           docker run --rm \
-            -v $(pwd)/app-copy:/scam \
+            -v $(pwd)/app-copy:/scan \
             ghcr.io/aquasecurity/trivy:latest \
-            fs --scanners vuln --severity HIGH,CRITICAL /scan
+            fs --severity HIGH,CRITICAL /scan
