@@ -78,7 +78,13 @@ jobs:
           vuln-type: os
           scanners: vuln
 
-      - name: Scan Node Dependencies 
+      - name: Scan Node Dependencies via filesystem
         run: |
-          docker run --rm devsecops-app sh -c "trivy fs --format table /app"
+          docker create --name temp-container devsecops-app
+          docker cp temp-container:/app ./app-cpy
+          docker rm temp-container
 
+          docker run --rm \
+            -v $(pwd)/app-copy:/scam \
+            aquasec/trivy:latest \
+            fs --scanners vuln --serverity HIGH,CRITICAL /scan
